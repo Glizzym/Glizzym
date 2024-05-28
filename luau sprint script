@@ -1,0 +1,51 @@
+local plr = game.Players.LocalPlayer
+local UIS = game:GetService("UserInputService")
+local humanoid = plr.Character and plr.Character:FindFirstChildOfClass("Humanoid")
+local cooldown = 2.0
+local sprintSpeed = 50
+local normalSpeed = 16 -- Assuming the default walk speed is 16
+
+-- Function to update humanoid if the character respawns
+local function updateHumanoid(character)
+	humanoid = character:FindFirstChildOfClass("Humanoid")
+end
+
+-- Connect the function to CharacterAdded event
+plr.CharacterAdded:Connect(updateHumanoid)
+
+-- Ensure humanoid is updated if the script is run after the character has spawned
+if plr.Character then
+	updateHumanoid(plr.Character)
+end
+
+local animationID = "rbxassetid://17622542560" -- use ur own
+local animationPriority = Enum.AnimationPriority.Action
+local animation = Instance.new("Animation")
+animation.AnimationId = animationID
+local animationTrack = humanoid:LoadAnimation(animation)
+animationTrack.Priority = animationPriority
+animationTrack.Looped = true
+
+-- Connect InputBegan event to handle sprint start
+UIS.InputBegan:Connect(function(input, isProcessed)
+	if isProcessed then return end
+
+	if input.KeyCode == Enum.KeyCode.LeftShift then
+		animationTrack:Play()
+		if humanoid then
+			humanoid.WalkSpeed = sprintSpeed
+		end
+	end
+end)
+
+-- Connect InputEnded event to handle sprint stop
+UIS.InputEnded:Connect(function(input, isProcessed)
+	if isProcessed then return end
+
+	if input.KeyCode == Enum.KeyCode.LeftShift then
+		animationTrack:Stop()
+		if humanoid then
+			humanoid.WalkSpeed = normalSpeed
+		end
+	end
+end)
